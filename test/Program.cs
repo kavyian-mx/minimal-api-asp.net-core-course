@@ -34,11 +34,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/", () => "Hello World!");
-
-app.MapGet("/Catagory", (CategoryService categoryservice) =>
+app.MapGet("/sentallcategories", async (CategoryService categoryService) =>
 {
-    return Results.Ok<List<Category>>(categoryservice.GetCategories());
+    var categories = await categoryService.GetCategories();
+    return Results.Ok(categories);
 });
 
 app.MapPost("/categories", async (Category category, CategoryService service) =>
@@ -46,6 +45,32 @@ app.MapPost("/categories", async (Category category, CategoryService service) =>
     var newId = await service.InsertAsync(category);
     return Results.Created($"/categories/{newId}", category);
 });
+
+
+app.MapGet("/categories/{id:int}", async (int id, CategoryService service) =>
+{
+    var category = await service.GetByIdAsync(id);
+    return category is null ? Results.NotFound() : Results.Ok(category);
+});
+
+app.MapPut("/categories/{id}", async (int id, Category inputCategory, CategoryService service) =>
+{
+    var existing = await service.GetByIdAsync(id);
+    if (existing == null)
+        return Results.NotFound();
+
+    existing.Name = inputCategory.Name;
+    await service.UpdateAsync(existing);
+    return Results.NoContent();
+});
+
+app.MapDelete("/categories/{id:int}", async (int id, CategoryService service) =>
+{
+    var deleted = await service.DeleteAsync(id);
+
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
 
 app.Run();
 
