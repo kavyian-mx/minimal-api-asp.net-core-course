@@ -11,8 +11,8 @@ namespace Entites
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(100)]
+        [Required(ErrorMessage = "نام دسته‌بندی الزامی است.")]
+        [StringLength(100, ErrorMessage = "نام دسته‌بندی نباید بیش از 100 کاراکتر باشد.")]
         public string Name { get; set; } = "";
     }
 }

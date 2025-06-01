@@ -17,5 +17,7 @@ namespace DataBase
         }
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Teacher> Teachers { get; set; }
+
     }
 }
