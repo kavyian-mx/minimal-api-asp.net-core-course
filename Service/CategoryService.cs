@@ -53,7 +53,7 @@ namespace Service
             var entity = await _ctx.Categories.FirstOrDefaultAsync(c => c.Id == id);
 
             if (entity == null)
-                return false; //      
+                return false;       
 
             _ctx.Categories.Remove(entity);
             await _ctx.SaveChangesAsync();

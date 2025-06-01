@@ -22,5 +22,7 @@ app.UseHttpLogging();
 
 // EndpointåÇ
 app.MapCategoryEndpoints();
+app.MapTeacherEndpoints();
+
 
 app.Run();
