@@ -1,42 +1,45 @@
 ﻿using Entites;
 using Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Endpoints;
 
 public static class TeacherEndpoints
 {
-    public static void MapTeacherEndpoints(this WebApplication app)
+    public static void MapTeacherEndpoints(this IEndpointRouteBuilder app)
     {
-        // دریافت همه‌ی معلم‌ها
-        app.MapGet("/teachers", async (TeacherService service) =>
+        var group = app.MapGroup("/teachers").WithTags("Teachers");
+
+        // دریافت همه معلم‌ها
+        group.MapGet("/", async (TeacherService service) =>
         {
             var teachers = await service.GetTeachers();
             return Results.Ok(teachers);
-        });
+        }).WithName("GetAllTeachers");
 
-        // دریافت معلم خاص بر اساس آیدی
-        app.MapGet("/teachers/{id:int}", async (int id, TeacherService service) =>
+        // دریافت معلم بر اساس آیدی
+        group.MapGet("/{id:int}", async (int id, TeacherService service) =>
         {
             var teacher = await service.GetTeacherIdAsync(id);
             return teacher is null ? Results.NotFound() : Results.Ok(teacher);
-        });
+        }).WithName("GetTeacherById");
 
-        // جستجو
-        app.MapGet("/teachers/search", async (string? firstName, string? lastName, TeacherService service) =>
+        // جستجو با نام یا نام خانوادگی
+        group.MapGet("/search", async ([FromQuery] string? firstName, [FromQuery] string? lastName, TeacherService service) =>
         {
             var result = await service.SearchAsync(lastName, firstName);
             return Results.Ok(result);
-        });
+        }).WithName("SearchTeachers");
 
         // افزودن معلم جدید
-        app.MapPost("/teachers", async (Teacher teacher, TeacherService service) =>
+        group.MapPost("/", async ([FromBody] Teacher teacher, TeacherService service) =>
         {
             var id = await service.InsertAsync(teacher);
             return Results.Created($"/teachers/{id}", teacher);
-        });
+        }).WithName("CreateTeacher");
 
         // ویرایش معلم
-        app.MapPut("/teachers/{id:int}", async (int id, Teacher updated, TeacherService service) =>
+        group.MapPut("/{id:int}", async (int id, [FromBody] Teacher updated, TeacherService service) =>
         {
             var exists = await service.Exists(id);
             if (!exists) return Results.NotFound();
@@ -44,36 +47,36 @@ public static class TeacherEndpoints
             updated.Id = id;
             var updatedOk = await service.UpdateAsync(updated);
             return updatedOk ? Results.NoContent() : Results.BadRequest();
-        });
+        }).WithName("UpdateTeacher");
 
         // حذف معلم
-        app.MapDelete("/teachers/{id:int}", async (int id, TeacherService service) =>
+        group.MapDelete("/{id:int}", async (int id, TeacherService service) =>
         {
             var deleted = await service.DeleteAsync(id);
             return deleted ? Results.NoContent() : Results.NotFound();
-        });
-        // بارگذاری عکس معلم وبا سواگر قابل تست نیست 
-        app.MapPost("/teachers/upload", async (HttpRequest request, TeacherService service) =>
+        }).WithName("DeleteTeacher");
+
+        // بارگذاری فایل عکس معلم
+        group.MapPost("/upload", async (HttpRequest request, TeacherService service) =>
         {
             var form = await request.ReadFormAsync();
+
             var file = form.Files.GetFile("file");
             var firstName = form["firstName"];
             var lastName = form["lastName"];
-            var birthday = DateTime.Parse(form["birthday"]);
+            var birthdayStr = form["birthday"];
 
             if (file is null || file.Length == 0)
-                return Results.BadRequest("File is missing.");
+                return Results.BadRequest("فایل ارسال نشده یا خالی است.");
+
+            if (!DateTime.TryParse(birthdayStr, out var birthday))
+                return Results.BadRequest("فرمت تاریخ تولد نامعتبر است.");
 
             var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
             var filePath = Path.Combine("wwwroot", "uploads", fileName);
-
-            // پوشه اگر نبود ایجاد کن
             Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-
             using (var stream = new FileStream(filePath, FileMode.Create))
-            {
                 await file.CopyToAsync(stream);
-            }
 
             var teacher = new Teacher
             {
@@ -84,8 +87,7 @@ public static class TeacherEndpoints
             };
 
             await service.InsertAsync(teacher);
-            return Results.Ok(teacher);
-        });
-
+            return Results.Created($"/teachers/{teacher.Id}", teacher);
+        }).DisableAntiforgery(); // برای فرم آپلود در صورت نیاز به غیرفعال‌سازی CSRF
     }
 }
