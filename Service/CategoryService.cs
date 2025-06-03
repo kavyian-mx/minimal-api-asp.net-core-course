@@ -15,9 +15,9 @@ namespace Service
             _ctx = ctx;
         }
 
-        public async Task< List<Category>> GetCategories()
+        public async Task<List<Category>> GetCategories()
         {
-            return await _ctx.Categories.OrderBy(c=>c.Name).AsNoTrackingWithIdentityResolution().ToListAsync();
+            return await _ctx.Categories.OrderBy(c => c.Name).AsNoTrackingWithIdentityResolution().ToListAsync();
         }
 
 
@@ -40,7 +40,7 @@ namespace Service
             var categoryToUpdate = await _ctx.Categories.FirstOrDefaultAsync(c => c.Id == category.Id);
 
             if (categoryToUpdate == null)
-                return false; 
+                return false;
 
             categoryToUpdate.Name = category.Name;
 
@@ -53,7 +53,7 @@ namespace Service
             var entity = await _ctx.Categories.FirstOrDefaultAsync(c => c.Id == id);
 
             if (entity == null)
-                return false;       
+                return false;
 
             _ctx.Categories.Remove(entity);
             await _ctx.SaveChangesAsync();

@@ -52,5 +52,40 @@ public static class TeacherEndpoints
             var deleted = await service.DeleteAsync(id);
             return deleted ? Results.NoContent() : Results.NotFound();
         });
+        // بارگذاری عکس معلم وبا سواگر قابل تست نیست 
+        app.MapPost("/teachers/upload", async (HttpRequest request, TeacherService service) =>
+        {
+            var form = await request.ReadFormAsync();
+            var file = form.Files.GetFile("file");
+            var firstName = form["firstName"];
+            var lastName = form["lastName"];
+            var birthday = DateTime.Parse(form["birthday"]);
+
+            if (file is null || file.Length == 0)
+                return Results.BadRequest("File is missing.");
+
+            var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine("wwwroot", "uploads", fileName);
+
+            // پوشه اگر نبود ایجاد کن
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var teacher = new Teacher
+            {
+                FirstName = firstName!,
+                LastName = lastName!,
+                Birtday = birthday,
+                UrlImage = $"/uploads/{fileName}"
+            };
+
+            await service.InsertAsync(teacher);
+            return Results.Ok(teacher);
+        });
+
     }
 }

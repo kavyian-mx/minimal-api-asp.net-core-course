@@ -1,12 +1,11 @@
 ﻿using DataBase;
-using Entites;
 using Microsoft.EntityFrameworkCore;
 
 namespace Service
 {
-   public class TeacherService
+    public class TeacherService
     {
-        private readonly Course _ctx;   
+        private readonly Course _ctx;
         public TeacherService(Course ctx)
         {
             _ctx = ctx;

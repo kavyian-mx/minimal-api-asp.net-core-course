@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         // DI سرویس‌ها
         services.AddScoped<CategoryService>();
         services.AddScoped<TeacherService>();
+        services.AddScoped<ProductService>();
         return services;
     }
 }

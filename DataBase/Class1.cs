@@ -18,6 +18,6 @@ namespace DataBase
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-
+        public DbSet<Product> products { get; set; }
     }
 }

@@ -19,10 +19,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpLogging();
+app.UseStaticFiles();
 
 // EndpointåÇ
 app.MapCategoryEndpoints();
 app.MapTeacherEndpoints();
-
+app.MapProductEndpoints();
 
 app.Run();
