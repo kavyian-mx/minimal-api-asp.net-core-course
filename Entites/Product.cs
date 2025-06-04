@@ -31,5 +31,8 @@ namespace Entites
 
         [MaxLength(250, ErrorMessage = "آدرس تصویر نمی‌تواند بیش از ۲۵۰ کاراکتر باشد")]
         public string? UrlImage { get; set; }
+
+
+        public List<Comment> Comments { get; set; } = new();
     }
 }

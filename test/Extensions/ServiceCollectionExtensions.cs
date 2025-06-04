@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CategoryService>();
         services.AddScoped<TeacherService>();
         services.AddScoped<ProductService>();
+        services.AddScoped<CommentService>();
 
         return services;
     }

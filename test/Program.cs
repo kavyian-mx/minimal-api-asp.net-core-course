@@ -25,5 +25,6 @@ app.UseStaticFiles();
 app.MapCategoryEndpoints();
 app.MapTeacherEndpoints();
 app.MapProductEndpoints();
+app.MapCommentEndpoints();
 
 app.Run();
